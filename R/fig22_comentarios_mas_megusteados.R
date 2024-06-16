@@ -18,9 +18,9 @@ extraer_megustas <- function(megustas) {
 
 comentarios$num_megustas <- sapply(comentarios$megustas, extraer_megustas)
 
-comentarios_ordenados <- comentarios[order(-comentarios$num_megustas), ]
+comentarios_ordenados <- comentarios[order(-comentarios$me_gusta), ]
 
-top_comentarios <- head(comentarios_ordenados, 20)
+top_comentarios <- head(comentarios_ordenados, 10)
 
 df_seleccionado <- top_comentarios %>% select(autor, post, num_megustas)
 

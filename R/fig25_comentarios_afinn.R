@@ -67,5 +67,8 @@ ggplot(resultado, aes(x = fecha, y = puntuacion_promedio)) +
   geom_line() + 
   geom_point() +
   geom_smooth(method = "loess", se = FALSE) +  # Agregar la línea de regresión LOESS
-  labs(x = "Fecha", y = "Puntuación total", title = "Puntuación total por día") +
-  theme_minimal()
+  labs(x = "Fecha", y = "Puntuación promedio", title = "Puntuación promedio por día") +
+  scale_x_date(date_breaks = "2 days", date_labels = "%d %b") +  # Etiquetas del eje x cada dos días
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+

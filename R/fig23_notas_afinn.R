@@ -67,7 +67,7 @@ ggplot(data = df_agrupado, aes(x = fecha, y = puntuacion_total)) +
   geom_line() +
   geom_point(color = "black") +
   labs(x = "Fecha", y = "Puntuación Total") +
-  scale_x_datetime(date_breaks = "1 month", date_labels = "%d %b", expand = c(0, 0)) +
+  scale_x_datetime(date_breaks = "5 days", date_labels = "%d %b", expand = c(0, 0)) +
   theme_minimal() +
   theme(legend.position = "none")
 
@@ -76,7 +76,8 @@ ggplot(data = df_agrupado, aes(x = fecha, y = puntuacion_total)) +
   geom_point(color = "black") +
   geom_smooth(method = "loess", se = FALSE, color = "blue") + # Agregar la línea de regresión suavizada
   labs(x = "Fecha", y = "Puntuación Total") +
-  scale_x_datetime(date_breaks = "1 month", date_labels = "%d %b", expand = c(0, 0)) +
+  scale_x_datetime(date_breaks = "2 days", date_labels = "%d %b", expand = c(0, 0)) +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1))
 

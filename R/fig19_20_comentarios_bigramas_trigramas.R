@@ -8,11 +8,12 @@ data <- read.csv('./Sociologia/Tesis/Datos/comentarios.csv')
 
 
 #Son comentarios casi pero no exactamente iguales. No los toma el duplicated
-#data <- subset(data, !(X %in% c(282, 239, 276. 244)))
-#data <- subset(data, !(X %in% c( 330, 415)))
-#data <- subset(data, !(X %in% c(205, 222, 244)))
-#data <- subset(data, !(X %in% c(87, 95)))
+#data <- subset(data, !(X %in% c(282, 239, 276, 244)))
 
+data <- subset(data, !(X %in% c( 330))) # al 415
+data <- subset(data, !(X %in% c(205)))
+data <- subset(data, !(X %in% c(87)))
+data <- subset(data, !(X %in% c(282, 276)))
 
 duplicados <- data[duplicated(data$post), ]
 
