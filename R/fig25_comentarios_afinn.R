@@ -44,31 +44,40 @@ comentarios_fecha <-comentarios_con_puntuacion %>%
 comentarios_fecha <- comentarios_fecha %>%
   mutate(fecha = as_date(fecha))
 
+# Asegurarse de que la columna 'Puntuacion_total' es numérica
+comentarios_fecha$Puntuacion_total <- as.numeric(comentarios_fecha$Puntuacion_total)
+
+# Crear la nueva columna 'etiqueta' manejando los NA
+comentarios_fecha$polaridad <- ifelse(is.na(comentarios_fecha$Puntuacion_total) | comentarios_fecha$Puntuacion_total == 0, NA, 
+                      ifelse(comentarios_fecha$Puntuacion_total >= 0, "positivo", "negativo"))
+
+comentarios_fecha$valor_polaridad <- ifelse(comentarios_fecha$polaridad == "positivo", 1, 
+                                            ifelse(comentarios_fecha$polaridad == "negativo", -1, NA))
+
+# Agrupar por fecha y sumar los valores de polaridad
 resultado <- comentarios_fecha %>%
   group_by(fecha) %>%
-  summarise(puntuacion_total = sum(Puntuacion_total, na.rm = TRUE),
+  summarise(puntuacion_total = sum(valor_polaridad, na.rm = TRUE),  # Sumar los valores de polaridad
             cantidad_comentarios = n())
-resultado <- resultado %>%
-  mutate(puntuacion_promedio = puntuacion_total / cantidad_comentarios)
 
+# Filtrar por año y mes
 resultado <- resultado %>%
-  filter(year(fecha) >= 2023)
-
-resultado <- resultado %>%
+  filter(year(fecha) >= 2023) %>%
   filter(month(fecha) <= 5)
 
-ggplot(resultado, aes(x = fecha, y = puntuacion_promedio)) +
+# Graficar la suma de polaridades por fecha
+ggplot(resultado, aes(x = fecha, y = puntuacion_total)) +
   geom_line() + 
   geom_point() +
-  labs(x = "Fecha", y = "Puntuación total", title = "Puntuación total por día") +
+  labs(x = "Fecha", y = "Polaridad (suma de +1 y -1)", title = "Suma de polaridad por día") +
   theme_minimal()
 
-ggplot(resultado, aes(x = fecha, y = puntuacion_promedio)) +
+# Agregar línea LOESS para suavizar los datos
+ggplot(resultado, aes(x = fecha, y = puntuacion_total)) +
   geom_line() + 
   geom_point() +
-  geom_smooth(method = "loess", se = FALSE) +  # Agregar la línea de regresión LOESS
-  labs(x = "Fecha", y = "Puntuación promedio", title = "Puntuación promedio por día") +
-  scale_x_date(date_breaks = "2 days", date_labels = "%d %b") +  # Etiquetas del eje x cada dos días
+  geom_smooth(method = "loess", se = FALSE) +  # Línea de suavizado LOESS
+  labs(x = "Fecha", y = "Suma de sentimientos", title = "Suma de polaridad por día") +
+  scale_x_date(date_breaks = "2 days", date_labels = "%d %b") +  # Etiquetas cada dos días
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
