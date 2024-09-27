@@ -1,9 +1,8 @@
 library(tm)
 library(quanteda)
 library(knitr)
-library(grid)
-library(gridExtra)
 library(kableExtra)
+
 notas <- read.csv('./Sociologia/Tesis/Datos/notas.csv')
 
 corpus <- Corpus(VectorSource(notas$cuerpo))

@@ -1,27 +1,21 @@
 library(tm)
 library(quanteda)
 library(knitr)
-library(grid)
-library(gridExtra)
+library(kableExtra)
 
+# Cargar datos
 data <- read.csv('./Sociologia/Tesis/Datos/comentarios.csv')
 
+# Eliminar duplicados manuales
+data <- subset(data, !(X %in% c(330, 205, 87, 282, 276)))
 
-#Son comentarios casi pero no exactamente iguales. No los toma el duplicated
-#data <- subset(data, !(X %in% c(282, 239, 276, 244)))
-
-data <- subset(data, !(X %in% c( 330))) # al 415
-data <- subset(data, !(X %in% c(205)))
-data <- subset(data, !(X %in% c(87)))
-data <- subset(data, !(X %in% c(282, 276)))
-
-duplicados <- data[duplicated(data$post), ]
-
-#Remover duplicados
+# Detectar y eliminar duplicados en los comentarios
 data <- data[!duplicated(data$post), ]
 
+# Crear Corpus
 corpus <- Corpus(VectorSource(data$post))
 
+# Preprocesamiento del texto
 corpus <- tm_map(corpus, content_transformer(tolower))
 corpus <- tm_map(corpus, content_transformer(function(x) gsub('["“”]', '', x)))
 corpus <- tm_map(corpus, removePunctuation)
@@ -29,48 +23,44 @@ corpus <- tm_map(corpus, removeNumbers)
 corpus <- tm_map(corpus, removeWords, stopwords("spanish"))
 corpus <- tm_map(corpus, stripWhitespace)
 
-stopwords_custom <- c("ahi", "ver", "mar", "plata", "hacer", "zona", "gente", "solo", "van", "hace", "ser", "solo", "mas","año","años","dia","vez","ahi", "ahí", "ahíla", "ahila", "así","acá","etc","tan", "paso", "hacen", "quieren", "gratisseria")
+# Stopwords personalizadas
+stopwords_custom <- c("ahi", "ver", "mar", "plata", "hacer", "zona", "gente", "solo", "van", "hace", "ser", "mas",
+                      "año", "años", "dia", "vez", "ahí", "así", "acá", "etc", "tan", "paso", "hacen", "quieren", 
+                      "gratisseria")
 corpus <- tm_map(corpus, removeWords, stopwords_custom)
 
-corpus2 <- corpus(corpus)
+# Convertir el corpus para uso en quanteda
+corpus_quanteda <- corpus(corpus)
 
-tokens <- tokens(corpus2, remove_punct = TRUE, remove_numbers = TRUE, remove_symbols = TRUE, remove_separators = TRUE)
+# Tokenización y creación de bigramas y trigramas
+tokens <- tokens(corpus_quanteda, remove_punct = TRUE, remove_numbers = TRUE)
+bigramas <- tokens_ngrams(tokens, n = 2L, concatenator = " ")  
+trigramas <- tokens_ngrams(tokens, n = 3L, concatenator = " ") 
 
-bigramas <- tokens_ngrams(tokens, n = 2L, skip = 0L, concatenator = " ")
-trigramas <- tokens_ngrams(tokens, n = 3L, skip = 0L, concatenator = " ")
+# Frecuencia de bigramas y trigramas
+frecuencia_bigramas <- sort(table(unlist(bigramas)), decreasing = TRUE)
+frecuencia_trigramas <- sort(table(unlist(trigramas)), decreasing = TRUE)
 
-frecuencia_bigramas <- table(unlist(bigramas))
-frecuencia_trigramas <- table(unlist(trigramas))
+# Convertir los resultados en dataframes
+resultados_bigramas <- as.data.frame(head(frecuencia_bigramas, 10))
+resultados_trigramas <- as.data.frame(head(frecuencia_trigramas, 10))
 
-frecuencia_ordenada <- sort(frecuencia_bigramas, decreasing = TRUE)
-frecuencia_ordenada_tri <- sort(frecuencia_trigramas, decreasing = TRUE)
+# Renombrar columnas
+colnames(resultados_bigramas) <- c("Bigramas", "Frecuencia")
+colnames(resultados_trigramas) <- c("Trigramas", "Frecuencia")
 
-print(head(frecuencia_ordenada, 10))
-print(head(frecuencia_ordenada_tri, 10))
-
-resultados_df <- as.data.frame(head(frecuencia_ordenada, 10))
-resultados_df_tri <- as.data.frame(head(frecuencia_ordenada_tri, 10))
-
-colnames(resultados_df) <- c("Bigramas", "Frecuencia")
-colnames(resultados_df_tri) <- c("Trigramas", "Frecuencia")
-
-tabla_html <- kable(resultados_df, "html") %>%
+# Crear tablas HTML
+tabla_bigramas <- kable(resultados_bigramas, "html") %>%
   kable_styling(full_width = FALSE, bootstrap_options = "striped")
 
-tabla_html_tri <- kable(resultados_df_tri, "html") %>%
+tabla_trigramas <- kable(resultados_trigramas, "html") %>%
   kable_styling(full_width = FALSE, bootstrap_options = "striped")
 
-print(tabla_html)
-View(tabla_html)
+# Imprimir tablas
+print(tabla_bigramas)
+print(tabla_trigramas)
 
-print(tabla_html_tri)
-View(tabla_html_tri)
-writeLines(tabla_html, "tabla_bigramas.html")
+# Guardar tablas en archivos HTML
+writeLines(as.character(tabla_bigramas), "tabla_bigramas.html")
+writeLines(as.character(tabla_trigramas), "tabla_trigramas.html")
 
-
-
-#Otra manera de graficar Tablas
-png("output.png", width=480,height=480,bg = "white")
-grid.table(resultados_df)
-dev.off()
-getwd()

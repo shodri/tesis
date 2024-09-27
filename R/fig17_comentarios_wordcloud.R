@@ -1,23 +1,21 @@
 library(tm)
-library(SnowballC)
 library(wordcloud)
 library(RColorBrewer)
-library(RCurl)
-library(XML)
 
+# Cargar los datos
 comentarios <- read.csv('./Sociologia/Tesis/Datos/comentarios.csv')
+
 # Crear un Corpus
 corpus <- Corpus(VectorSource(comentarios$post))
 
 # Preprocesamiento del texto
 corpus <- tm_map(corpus, content_transformer(tolower))
-corpus <- tm_map(corpus, content_transformer(function(x) gsub('["“”]', '', x)))
 corpus <- tm_map(corpus, removePunctuation)
 corpus <- tm_map(corpus, removeNumbers)
 corpus <- tm_map(corpus, removeWords, stopwords("spanish"))
 
-# Si tienes stopwords adicionales o palabras personalizadas a remover, puedes agregarlas así:
-stopwords_custom <- c("mar", "plata", "hacer", "zona", "gente", "solo", "van", "hace", "ser", "solo", "mas")
+# Stopwords personalizadas
+stopwords_custom <- c("mar", "plata", "hacer", "zona", "gente", "solo", "van", "hace", "ser", "mas")
 corpus <- tm_map(corpus, removeWords, stopwords_custom)
 
 corpus <- tm_map(corpus, stripWhitespace)
@@ -37,5 +35,6 @@ word_freq <- word_freq[order(-word_freq$freq), ]
 # Visualizar las 10 palabras más frecuentes
 head(word_freq, 10)
 
-wordcloud(words = word_freq$word, freq = word_freq$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,colors=brewer.pal(8, "Dark2"))
+# Generar la nube de palabras
+wordcloud(words = word_freq$word, freq = word_freq$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35, colors=brewer.pal(8, "Dark2"))
 

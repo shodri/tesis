@@ -1,4 +1,3 @@
-library(textmineR)
 library(topicmodels)
 library(tm)
 library(knitr)
